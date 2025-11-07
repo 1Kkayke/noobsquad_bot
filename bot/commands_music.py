@@ -530,3 +530,58 @@ class MusicCommands(commands.Cog):
         # Se não está tocando nada, inicia a reprodução
         if not vc.is_playing() and not vc.is_paused():
             await tocar_proxima_musica(vc, guild_id, ctx)
+
+    @commands.command(name='stats', aliases=['estatisticas'])
+    async def stats(self, ctx):
+        """Mostra estatísticas globais do bot"""
+        try:
+            # Estatísticas do servidor atual
+            guild = ctx.guild
+            voice_client = ctx.guild.voice_client
+            
+            # Contagem de usuários com perfis
+            all_profiles = await db.db.user_profiles.count_documents({})
+            
+            # Contagem de canais monitorados
+            monitored_count = await db.db.monitored_channels.count_documents({})
+            
+            # Estatísticas da fila atual
+            guild_id = ctx.guild.id
+            queue_size = len(play_queue.get(guild_id, []))
+            is_playing = voice_client and voice_client.is_playing()
+            is_autoplay = autoplay_enabled.get(guild_id, False)
+            
+            embed = discord.Embed(
+                title="📊 Estatísticas do Bot",
+                color=0x00ff00
+            )
+            
+            embed.add_field(
+                name="🎵 Música",
+                value=f"Status: {'▶️ Tocando' if is_playing else '⏸️ Parado'}\n"
+                      f"Fila: {queue_size} música(s)\n"
+                      f"Autoplay: {'✅ Ativo' if is_autoplay else '❌ Inativo'}",
+                inline=True
+            )
+            
+            embed.add_field(
+                name="👥 Usuários",
+                value=f"Perfis criados: {all_profiles}\n"
+                      f"Servidor: {guild.member_count} membros",
+                inline=True
+            )
+            
+            embed.add_field(
+                name="📺 Monitoramento",
+                value=f"Canais monitorados: {monitored_count}",
+                inline=True
+            )
+            
+            # Info do servidor
+            embed.set_footer(text=f"Servidor: {guild.name}")
+            
+            await ctx.send(embed=embed)
+            
+        except Exception as e:
+            logging.error(f"Erro ao obter estatísticas: {e}")
+            await ctx.send("❌ Erro ao obter estatísticas.")

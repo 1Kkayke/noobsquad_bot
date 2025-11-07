@@ -34,6 +34,7 @@ class HelpCommands(commands.Cog):
                   - `count` (opcional): quantas músicas adicionar (padrão 5)
                   - `append` (flag): adiciona ao final da fila em vez de tocar em seguida
                   - `search` (flag): tenta buscar por título quando não houver URL no histórico
+                `!stats` ou `!estatisticas` - Mostra estatísticas do bot
             """,
             inline=False
         )
