@@ -1,3 +1,14 @@
+"""
+Utilitários para Processamento de Música
+
+Este módulo fornece funções auxiliares para:
+- Limpeza e validação de URLs do YouTube
+- Extração de streams de áudio usando yt-dlp
+- Aplicação de equalizadores FFmpeg
+
+Autor: 1Kkayke
+"""
+
 import re
 import urllib.parse
 import logging
@@ -7,7 +18,21 @@ import yt_dlp
 from config.settings import EQUALIZER_PRESETS
 
 def clean_youtube_url(url: str) -> str:
-    """Remove parâmetros desnecessários da URL do YouTube."""
+    """Remove parâmetros desnecessários da URL do YouTube.
+    
+    Mantém apenas parâmetros essenciais como 'v' (vídeo) e 'list' (playlist),
+    removendo tracking e outros parâmetros que não afetam a reprodução.
+    
+    Args:
+        url: URL completa do YouTube
+    
+    Returns:
+        URL limpa com apenas parâmetros essenciais
+    
+    Example:
+        >>> clean_youtube_url("https://youtube.com/watch?v=abc&feature=share")
+        "https://youtube.com/watch?v=abc"
+    """
     parsed_url = urllib.parse.urlparse(url)
     query_params = urllib.parse.parse_qs(parsed_url.query)
 
@@ -25,7 +50,20 @@ def clean_youtube_url(url: str) -> str:
     )
 
 def is_youtube_url(url: str) -> bool:
-    """Valida se a URL fornecida é do YouTube ou YouTube Music."""
+    """Valida se a URL fornecida é do YouTube ou YouTube Music.
+    
+    Args:
+        url: URL para validar
+    
+    Returns:
+        True se for uma URL válida do YouTube, False caso contrário
+    
+    Example:
+        >>> is_youtube_url("https://youtube.com/watch?v=abc")
+        True
+        >>> is_youtube_url("https://example.com")
+        False
+    """
     youtube_regex = r'^(https?://)?(www\.)?(youtube\.com|youtu\.be|music\.youtube\.com)/.+$'
     if not re.match(youtube_regex, url):
         logging.warning(f'URL inválida: {url}. Deve ser uma URL do YouTube.')
@@ -33,7 +71,28 @@ def is_youtube_url(url: str) -> bool:
     return True
 
 async def stream_musica(url: str, preset_name: str = "padrao"):
-    """Extrai o stream de áudio direto de uma URL do YouTube."""
+    """Extrai o stream de áudio direto de uma URL do YouTube.
+    
+    Usa yt-dlp para obter a melhor qualidade de áudio disponível
+    e aplica equalização usando FFmpeg.
+    
+    Args:
+        url: URL do vídeo do YouTube
+        preset_name: Nome do preset de equalização ('padrao', 'pop', 'rock', 'graves')
+    
+    Returns:
+        Tupla contendo (source, title, info):
+        - source: discord.FFmpegPCMAudio pronto para reprodução
+        - title: Título do vídeo
+        - info: Dicionário com metadados completos do vídeo
+        
+        Retorna (None, None, None) em caso de erro
+    
+    Example:
+        >>> source, title, info = await stream_musica("https://youtube.com/watch?v=abc", "rock")
+        >>> if source:
+        ...     voice_client.play(source)
+    """
     try:
         ydl_opts = {
             'format': 'bestaudio/best',

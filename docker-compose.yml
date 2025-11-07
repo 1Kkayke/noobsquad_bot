@@ -1,7 +1,9 @@
 version: "3.8"
+
 services:
   bot:
     build: .
+    container_name: noobsquad-bot
     env_file:
       - .env
     depends_on:
@@ -10,20 +12,39 @@ services:
     volumes:
       - ./:/app
     restart: unless-stopped
+    networks:
+      - noobsquad-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   mongo:
     image: mongo:6.0
+    container_name: noobsquad-mongo
     restart: unless-stopped
     volumes:
       - mongo-data:/data/db
     ports:
       - "27017:27017"
+    networks:
+      - noobsquad-network
     healthcheck:
-      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      # Use mongosh for MongoDB 6.0+, falls back to legacy mongo command if needed
+      test: ["CMD-SHELL", "mongosh --eval 'db.adminCommand(\"ping\")' --quiet || mongo --eval 'db.adminCommand(\"ping\")' --quiet"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 30s
+    environment:
+      - MONGO_INITDB_DATABASE=noobsquad_bot
 
 volumes:
   mongo-data:
+    driver: local
+
+networks:
+  noobsquad-network:
+    driver: bridge
 

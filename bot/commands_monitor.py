@@ -36,6 +36,11 @@ class MonitorCommands(commands.Cog):
         """Adiciona um canal do YouTube para monitoramento
         Uso: !monitorar_youtube <url_do_canal ou @nome>"""
         try:
+            # Verifica se a API do YouTube está configurada
+            if not self.monitor.youtube:
+                await ctx.send("❌ A API do YouTube não está configurada. Por favor, configure YOUTUBE_API_KEY no arquivo .env")
+                return
+
             # Garante que o perfil do usuário existe
             await self._ensure_user_profile(ctx.author)
 
@@ -78,6 +83,11 @@ class MonitorCommands(commands.Cog):
         """Adiciona um canal da Twitch para monitoramento
         Uso: !monitorar_twitch <nome_do_canal>"""
         try:
+            # Verifica se a API do Twitch está configurada
+            if not self.monitor.twitch:
+                await ctx.send("❌ A API do Twitch não está configurada. Por favor, configure TWITCH_CLIENT_ID e TWITCH_CLIENT_SECRET no arquivo .env")
+                return
+
             # Garante que o perfil do usuário existe
             await self._ensure_user_profile(ctx.author)
 

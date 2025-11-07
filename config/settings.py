@@ -5,8 +5,8 @@ load_dotenv()
 
 # Discord configs
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
-REBOOT_CHANNEL_ID = os.getenv('REBOOT_CHANNEL_ID')
-CHAT_JUKEBOX = os.getenv('CHAT_JUKEBOX')
+REBOOT_CHANNEL_ID = int(os.getenv('REBOOT_CHANNEL_ID', 0))
+CHAT_JUKEBOX = int(os.getenv('CHAT_JUKEBOX', 0))
 
 # Notification channel
 NOTIFICATION_CHANNEL_ID = int(os.getenv('NOTIFICATION_CHANNEL_ID', 0))

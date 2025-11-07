@@ -1,3 +1,18 @@
+"""
+Modelos de Dados para o Bot
+
+Este módulo define as estruturas de dados usadas pelo bot:
+- Song: Representação de uma música no histórico
+- MusicPreference: Preferências musicais do usuário
+- MonitoredChannel: Canal monitorado (YouTube ou Twitch)
+- UserProfile: Perfil completo do usuário
+
+Todos os modelos usam dataclasses para simplificação e 
+incluem métodos para conversão para/de dicionários MongoDB.
+
+Autor: 1Kkayke
+"""
+
 from datetime import datetime, UTC
 from typing import List, Dict, Optional
 from dataclasses import dataclass
@@ -5,7 +20,15 @@ from dataclasses import dataclass
 
 @dataclass
 class Song:
-    """Representa uma música no histórico"""
+    """Representa uma música no histórico de reprodução.
+    
+    Attributes:
+        title: Título da música
+        url: URL do YouTube
+        played_at: Data/hora em que foi tocada
+        artist: Nome do artista (opcional)
+        genre: Gênero musical (opcional)
+    """
     title: str
     url: str
     played_at: datetime
@@ -15,7 +38,16 @@ class Song:
 
 @dataclass
 class MusicPreference:
-    """Representa uma preferência musical"""
+    """Representa uma preferência musical do usuário.
+    
+    Usado para rastrear gostos musicais e gerar recomendações.
+    
+    Attributes:
+        name: Nome do gênero, artista ou banda
+        type: Tipo da preferência ('genre', 'artist', 'band')
+        count: Número de vezes que músicas deste tipo foram tocadas
+        last_updated: Data/hora da última atualização
+    """
     name: str  # Nome do gênero, artista ou banda
     type: str  # 'genre', 'artist', 'band'
     count: int  # Número de vezes que músicas deste tipo foram tocadas
@@ -24,10 +56,21 @@ class MusicPreference:
 
 @dataclass
 class MonitoredChannel:
-    """Representa um canal monitorado (YouTube ou Twitch) como documento próprio
-
-    Agora existe uma coleção separada `monitored_channels` no banco. Cada documento
-    armazena a lista de `subscribers` (IDs de Discord) que reclamam este canal.
+    """Representa um canal monitorado (YouTube ou Twitch).
+    
+    Armazenado em coleção separada no MongoDB com sistema de assinaturas.
+    Múltiplos usuários podem se inscrever no mesmo canal.
+    
+    Attributes:
+        platform: 'youtube' ou 'twitch'
+        channel_id: ID único do canal na plataforma
+        channel_name: Nome de exibição do canal
+        added_by: Discord user ID de quem adicionou primeiro (opcional)
+        last_video_id: ID do último vídeo postado (YouTube)
+        last_stream_id: ID da última stream (Twitch)
+        is_live: Status atual de transmissão ao vivo
+        added_at: Data/hora de quando foi adicionado
+        subscribers: Lista de Discord user IDs inscritos
     """
     platform: str  # 'youtube' ou 'twitch'
     channel_id: str
@@ -73,7 +116,17 @@ class MonitoredChannel:
 
 @dataclass
 class UserProfile:
-    """Representa o perfil de um usuário no MongoDB"""
+    """Representa o perfil completo de um usuário no MongoDB.
+    
+    Contém todo o histórico musical, preferências e estatísticas.
+    
+    Attributes:
+        discord_id: ID único do usuário no Discord (string)
+        username: Nome de usuário no Discord
+        music_history: Lista de músicas tocadas (máximo 100 recentes)
+        music_preferences: Lista de preferências musicais
+        created_at: Data/hora de criação do perfil
+    """
     discord_id: str
     username: str
     music_history: List[Song] = None  # Será inicializado como lista vazia

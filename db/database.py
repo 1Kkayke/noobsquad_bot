@@ -1,3 +1,18 @@
+"""
+Gerenciador de Banco de Dados MongoDB
+
+Este módulo gerencia todas as interações com o banco de dados MongoDB:
+- Conexão e inicialização
+- Operações CRUD para perfis de usuário
+- Gerenciamento de histórico musical
+- Sistema de preferências musicais
+- Gerenciamento de canais monitorados
+
+Usa pymongo para comunicação assíncrona com MongoDB.
+
+Autor: 1Kkayke
+"""
+
 from pymongo import MongoClient
 from datetime import datetime
 import logging
@@ -7,6 +22,17 @@ from typing import List, Optional
 
 
 class Database:
+    """Gerenciador principal do banco de dados MongoDB.
+    
+    Responsável por todas as operações de banco de dados do bot.
+    Mantém conexões e referências às coleções.
+    
+    Attributes:
+        client: Cliente PyMongo
+        db: Database do MongoDB
+        user_profiles: Coleção de perfis de usuário
+        monitored_channels: Coleção de canais monitorados
+    """
     def __init__(self):
         self.client = None
         self.db = None
