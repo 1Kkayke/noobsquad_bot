@@ -31,7 +31,8 @@ services:
     networks:
       - noobsquad-network
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      # Use mongosh for MongoDB 6.0+, falls back to legacy mongo command if needed
+      test: ["CMD-SHELL", "mongosh --eval 'db.adminCommand(\"ping\")' --quiet || mongo --eval 'db.adminCommand(\"ping\")' --quiet"]
       interval: 10s
       timeout: 5s
       retries: 5

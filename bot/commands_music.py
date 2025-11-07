@@ -1,4 +1,5 @@
 import logging
+import random
 import discord
 from discord.ext import commands
 import yt_dlp
@@ -288,7 +289,6 @@ class MusicCommands(commands.Cog):
             await ctx.send("A fila precisa ter pelo menos 2 músicas para embaralhar.")
             return
 
-        import random
         queue_list = list(play_queue[guild_id])
         random.shuffle(queue_list)
         play_queue[guild_id] = deque(queue_list)
@@ -539,11 +539,11 @@ class MusicCommands(commands.Cog):
             guild = ctx.guild
             voice_client = ctx.guild.voice_client
             
-            # Contagem de usuários com perfis
-            all_profiles = await db.db.user_profiles.count_documents({})
+            # Contagem de usuários com perfis (usa estimated_document_count para melhor performance)
+            all_profiles = db.db.user_profiles.estimated_document_count()
             
             # Contagem de canais monitorados
-            monitored_count = await db.db.monitored_channels.count_documents({})
+            monitored_count = db.db.monitored_channels.estimated_document_count()
             
             # Estatísticas da fila atual
             guild_id = ctx.guild.id
