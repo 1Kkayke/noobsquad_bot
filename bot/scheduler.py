@@ -38,6 +38,10 @@ class MonitorScheduler:
         if not self.bot.is_ready():
             return
 
+        if not NOTIFICATION_CHANNEL_ID:
+            logging.warning("NOTIFICATION_CHANNEL_ID não configurado. Pulando verificação do YouTube.")
+            return
+
         notification_channel = self.bot.get_channel(NOTIFICATION_CHANNEL_ID)
         if not notification_channel:
             logging.error(f"Canal de notificação {NOTIFICATION_CHANNEL_ID} não encontrado!")
@@ -72,6 +76,10 @@ class MonitorScheduler:
     async def check_twitch_updates(self):
         """Verifica atualizações dos canais da Twitch"""
         if not self.bot.is_ready():
+            return
+
+        if not NOTIFICATION_CHANNEL_ID:
+            logging.warning("NOTIFICATION_CHANNEL_ID não configurado. Pulando verificação do Twitch.")
             return
 
         notification_channel = self.bot.get_channel(NOTIFICATION_CHANNEL_ID)

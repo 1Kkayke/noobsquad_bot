@@ -52,6 +52,10 @@ class ChannelMonitor:
 
     async def check_youtube_updates(self, channel: MonitoredChannel) -> Optional[dict]:
         """Verifica atualizações de um canal do YouTube"""
+        if not self.youtube:
+            logging.warning("YouTube API não está configurada. Configure YOUTUBE_API_KEY.")
+            return None
+        
         try:
             # Busca os últimos vídeos do canal
             request = self.youtube.search().list(
@@ -137,6 +141,10 @@ class ChannelMonitor:
 
     def extract_youtube_channel_id(self, input_str: str) -> Optional[str]:
         """Extrai o ID do canal do YouTube de diferentes formatos de URL, incluindo handle (@)"""
+        if not self.youtube:
+            logging.error("YouTube API não está configurada. Configure YOUTUBE_API_KEY.")
+            return None
+            
         try:
             # Se já é um ID válido
             if input_str.startswith('UC') and len(input_str) == 24:

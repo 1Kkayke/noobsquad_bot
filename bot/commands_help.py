@@ -19,9 +19,15 @@ class HelpCommands(commands.Cog):
             name="Comandos de Música",
             value="""
                 `!play <url> [autoplay]` - Toca uma música do YouTube ou adiciona à fila
+                `!pause` - Pausa a música atual
+                `!resume` - Retoma a música pausada
                 `!skip` - Pula para a próxima música
                 `!stop` - Para a música e limpa a fila
                 `!leave` - Faz o bot sair do canal de voz
+                `!queue` ou `!fila` - Mostra a fila de músicas
+                `!nowplaying` ou `!np` - Mostra a música que está tocando
+                `!clear` ou `!limpar` - Limpa toda a fila
+                `!shuffle` ou `!embaralhar` - Embaralha a fila
                 `!profile` - Mostra seu perfil musical
                 `!recommend` - Mostra recomendações com base nas suas preferências
                 `!reproduzir_historico [count] [append] [search]` - Adiciona músicas do seu histórico à fila

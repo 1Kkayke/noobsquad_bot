@@ -163,10 +163,138 @@ class MusicCommands(commands.Cog):
             guild_id = ctx.guild.id
             if guild_id in play_queue:
                 play_queue[guild_id].clear()
+            if guild_id in autoplay_enabled:
+                autoplay_enabled[guild_id] = False
             await ctx.guild.voice_client.disconnect()
             await ctx.send("Desconectado do canal de voz.")
         else:
             await ctx.send("Não estou em nenhum canal de voz.")
+
+    @commands.command(name='pause')
+    async def pause(self, ctx):
+        """Pausa a música atual"""
+        if ctx.guild.voice_client and ctx.guild.voice_client.is_playing():
+            ctx.guild.voice_client.pause()
+            await ctx.send("⏸️ Música pausada.")
+        else:
+            await ctx.send("Nenhuma música está tocando.")
+
+    @commands.command(name='resume')
+    async def resume(self, ctx):
+        """Retoma a música pausada"""
+        if ctx.guild.voice_client and ctx.guild.voice_client.is_paused():
+            ctx.guild.voice_client.resume()
+            await ctx.send("▶️ Música retomada.")
+        else:
+            await ctx.send("Nenhuma música está pausada.")
+
+    @commands.command(name='queue', aliases=['fila', 'q'])
+    async def queue_command(self, ctx):
+        """Mostra a fila de músicas atual"""
+        guild_id = ctx.guild.id
+        
+        if guild_id not in play_queue or not play_queue[guild_id]:
+            await ctx.send("A fila está vazia.")
+            return
+
+        embed = discord.Embed(
+            title="🎵 Fila de Reprodução",
+            color=0x00ff00
+        )
+
+        # Mostra até 10 músicas da fila
+        queue_list = list(play_queue[guild_id])
+        total = len(queue_list)
+        
+        for i, (url, preset) in enumerate(queue_list[:10], 1):
+            # Tenta extrair o título da URL ou usa a URL se não conseguir
+            title = url.split('/')[-1] if '/' in url else url
+            embed.add_field(
+                name=f"{i}. {title[:50]}",
+                value=f"Preset: `{preset}`",
+                inline=False
+            )
+        
+        if total > 10:
+            embed.set_footer(text=f"... e mais {total - 10} música(s) na fila")
+        else:
+            embed.set_footer(text=f"Total: {total} música(s)")
+
+        await ctx.send(embed=embed)
+
+    @commands.command(name='nowplaying', aliases=['np', 'tocando'])
+    async def now_playing(self, ctx):
+        """Mostra a música que está tocando agora"""
+        guild_id = ctx.guild.id
+        
+        if not ctx.guild.voice_client or not ctx.guild.voice_client.is_playing():
+            await ctx.send("Nenhuma música está tocando no momento.")
+            return
+
+        if guild_id not in last_played_info:
+            await ctx.send("Informações da música atual não disponíveis.")
+            return
+
+        info = last_played_info[guild_id]
+        title = info.get('title', 'Desconhecido')
+        uploader = info.get('uploader', 'Desconhecido')
+        duration = info.get('duration', 0)
+        thumbnail = info.get('thumbnail', '')
+        url = info.get('webpage_url', '')
+
+        # Formata a duração em minutos:segundos
+        minutes = duration // 60
+        seconds = duration % 60
+        duration_str = f"{minutes}:{seconds:02d}" if duration else "N/A"
+
+        embed = discord.Embed(
+            title="🎵 Tocando Agora",
+            description=f"**{title}**",
+            color=0x00ff00,
+            url=url
+        )
+        
+        embed.add_field(name="Canal", value=uploader, inline=True)
+        embed.add_field(name="Duração", value=duration_str, inline=True)
+        
+        if thumbnail:
+            embed.set_thumbnail(url=thumbnail)
+        
+        # Mostra se autoplay está ativo
+        if autoplay_enabled.get(guild_id, False):
+            embed.set_footer(text="🔁 Autoplay ativo")
+
+        await ctx.send(embed=embed)
+
+    @commands.command(name='clear', aliases=['limpar'])
+    async def clear_queue(self, ctx):
+        """Limpa a fila de músicas"""
+        guild_id = ctx.guild.id
+        
+        if guild_id not in play_queue or not play_queue[guild_id]:
+            await ctx.send("A fila já está vazia.")
+            return
+
+        count = len(play_queue[guild_id])
+        play_queue[guild_id].clear()
+        await ctx.send(f"🗑️ Fila limpa! {count} música(s) removida(s).")
+
+    @commands.command(name='shuffle', aliases=['embaralhar'])
+    async def shuffle_queue(self, ctx):
+        """Embaralha a fila de músicas"""
+        guild_id = ctx.guild.id
+        
+        if guild_id not in play_queue or len(play_queue[guild_id]) < 2:
+            await ctx.send("A fila precisa ter pelo menos 2 músicas para embaralhar.")
+            return
+
+        import random
+        queue_list = list(play_queue[guild_id])
+        random.shuffle(queue_list)
+        play_queue[guild_id] = deque(queue_list)
+        
+        await ctx.send(f"🔀 Fila embaralhada! {len(queue_list)} música(s).")
+
 
     @commands.command(name='profile')
     async def profile(self, ctx):

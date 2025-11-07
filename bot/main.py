@@ -26,9 +26,6 @@ logging.basicConfig(
 if not DISCORD_TOKEN:
     logging.error("Token do bot não encontrado no arquivo .env")
     raise ValueError("Token do bot não encontrado no arquivo .env")
-if not REBOOT_CHANNEL_ID:
-    logging.error("ID do canal de reboot não encontrado no arquivo .env")
-    raise ValueError("ID do canal de reboot não encontrado no arquivo .env")
 
 # --- CONFIGURAÇÃO DAS INTENTS E BOT ---
 intents = discord.Intents.default()
@@ -76,9 +73,10 @@ async def on_ready():
 
     try:
         # Reconectar ao canal de voz se o bot reiniciar
-        reboot_channel = bot.get_channel(REBOOT_CHANNEL_ID)
-        if reboot_channel:
-            await reboot_channel.send("🔄 Bot reiniciado e pronto para uso!")
+        if REBOOT_CHANNEL_ID:
+            reboot_channel = bot.get_channel(REBOOT_CHANNEL_ID)
+            if reboot_channel:
+                await reboot_channel.send("🔄 Bot reiniciado e pronto para uso!")
     except Exception as e:
         logging.error(f"Erro ao enviar mensagem de reboot: {e}")
 
